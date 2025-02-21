@@ -1,0 +1,48 @@
+services:
+  web:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: php-apache
+    user: "1000:1000"
+    ports:
+      - "80:80"
+    volumes:
+      - ../app:/var/www/html/app/
+      - ./php/vhosts.conf:/etc/apache2/sites-available/000-default.conf
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    volumes:
+      - db_mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+  
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "8081:8080"
+    networks:
+      - app-network
+
+volumes:
+  db_mysql_data:
+
+networks:
+  app-network:
+    driver: bridge
